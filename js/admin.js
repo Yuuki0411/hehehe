@@ -217,7 +217,7 @@ function renderWeeklyReport(rows) {
       return (
         '<div class="wk-col">' +
         '  <span class="wk-val">' + (d.revenue ? formatRupiah(d.revenue).replace("Rp", "") : "-") + "</span>" +
-        '  <div class="wk-bar" style="height:' + h + '%" title="' + d.label + ': ' + d.count + " transaksi, " + formatRupiah(d.revenue) + '"></div>' +
+        '  <div class="wk-bar" style="height:' + h + '%" title="' + d.label + ": " + d.count + " transaksi, " + formatRupiah(d.revenue) + '"></div>' +
         '  <span class="wk-label">' + d.label + "</span>" +
         "</div>"
       );
@@ -268,48 +268,115 @@ async function confirmAll() {
   alert(pending.length + " transaksi dikonfirmasi." + (notified ? "\nNotifikasi WA dikirim ke " + notified + " pembeli." : ""));
 }
 
+/* ============================================================
+   EKSPOR CSV — format lebih rapi & nyaman dipandang
+   - Kolom Harga diformat Rp
+   - Tanggal diformat DD/MM/YYYY HH:mm
+   - Status ditulis lengkap
+   - Ringkasan di bawah: total transaksi, total sukses, total revenue
+   - BOM UTF-8 supaya Excel tidak mojibake
+   ============================================================ */
+
 /* Escape nilai CSV (koma, kutip, baris baru) */
 function csvCell(v) {
   const s = String(v == null ? "" : v);
-  return /[,"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+  return /[,\"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
 }
 
-/* Ekspor semua transaksi ke file CSV */
+/* Format tanggal untuk CSV: DD/MM/YYYY HH:mm */
+function csvFmtDate(isoStr) {
+  if (!isoStr) return "";
+  const d = new Date(isoStr);
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mi = String(d.getMinutes()).padStart(2, "0");
+  return dd + "/" + mm + "/" + yyyy + " " + hh + ":" + mi;
+}
+
+/* Format harga: 5000 → "Rp5.000" */
+function csvFmtHarga(val) {
+  const n = Number(val || 0);
+  return "Rp" + n.toLocaleString("id-ID");
+}
+
+/* Status yang sudah dibaca */
+function csvStatus(it) {
+  const s = it.status || "";
+  if (s === "Sukses") return "✅ Sukses";
+  if (s === "Menunggu Pembayaran") return "⏳ Menunggu Pembayaran";
+  if (s === "Pending") return "⏳ Pending";
+  if (s === "Dibatalkan") return "❌ Dibatalkan";
+  return s || "-";
+}
+
+/* Ekspor CSV */
 async function exportCSV() {
   const rows = await AdminService.getTransactions();
   if (!rows.length) return alert("Belum ada transaksi untuk diekspor.");
 
-  const header = ["Tanggal", "User", "Game", "ID Game", "Paket", "Harga", "Metode", "No. WA", "Status", "Ref ID", "Catatan"];
+  /* ---------- Header ---------- */
+  const header = [
+    "No",
+    "Tanggal",
+    "Username",
+    "Game",
+    "ID Game",
+    "Paket",
+    "Harga",
+    "Metode Bayar",
+    "No. WhatsApp",
+    "Status",
+    "Ref ID",
+    "Catatan",
+  ];
+
   const lines = [header.join(",")];
-  rows.forEach((it) => {
+
+  /* ---------- Data rows ---------- */
+  rows.forEach((it, idx) => {
     lines.push(
       [
-        fmtDate(it.date),
-        it._username,
+        idx + 1,
+        csvFmtDate(it.date),
+        it._username || "tanpa-akun",
         it.game,
         it.accId,
         it.pack,
-        Number(it.price || 0),
-        it.method || "",
-        it.wa ? "'" + it.wa : "",
-        it.status || "",
-        it.refId || "",
-        it.note || "",
+        csvFmtHarga(it.price),
+        it.method || "-",
+        it.wa || "-",
+        csvStatus(it),
+        it.refId || "-",
+        it.note || "-",
       ].map(csvCell).join(",")
     );
   });
 
-  // tambahkan baris ringkasan
-  const total = rows.reduce((s, r) => s + Number(r.price || 0), 0);
-  const sukses = rows.reduce((s, r) => s + (r.status === "Sukses" ? Number(r.price || 0) : 0), 0);
-  lines.push("");
-  lines.push(["Total Semua", "", "", "", "", total, "", "", "", "", ""].map(csvCell).join(","));
-  lines.push(["Total Sukses", "", "", "", "", sukses, "", "", "", "", ""].map(csvCell).join(","));
+  /* ---------- Ringkasan ---------- */
+  const totalAll = rows.length;
+  const totalSukses = rows.filter((r) => r.status === "Sukses").length;
+  const totalMenunggu = rows.filter((r) => r.status === "Menunggu Pembayaran" || r.status === "Pending").length;
+  const totalDibatalkan = rows.filter((r) => r.status === "Dibatalkan").length;
+  const revenue = rows
+    .filter((r) => r.status === "Sukses")
+    .reduce((s, r) => s + Number(r.price || 0), 0);
 
+  lines.push(""); // baris kosong pemisah
+  lines.push(",,,===== RINGKASAN =====,,");
+  lines.push(",,,Total Transaksi," + csvCell(totalAll) + ",");
+  lines.push(",,,Total Sukses," + csvCell(totalSukses) + ",");
+  lines.push(",,,Total Menunggu," + csvCell(totalMenunggu) + ",");
+  lines.push(",,,Total Dibatalkan," + csvCell(totalDibatalkan) + ",");
+  lines.push(",,,Total Pendapatan (Sukses)," + csvCell(csvFmtHarga(revenue)) + ",");
+  lines.push(",,,Dicetak pada," + csvCell(csvFmtDate(new Date().toISOString())) + ",");
+
+  /* ---------- Download ---------- */
   const blob = new Blob(["\ufeff" + lines.join("\r\n")], { type: "text/csv;charset=utf-8;" });
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = "topup-digems-transaksi-" + new Date().toISOString().slice(0, 10) + ".csv";
+  a.download = "Laporan-Transaksi-Digems-" + new Date().toISOString().slice(0, 10) + ".csv";
   document.body.appendChild(a);
   a.click();
   document.body.removeChild(a);
