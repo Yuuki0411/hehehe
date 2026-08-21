@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login / Daftar - Topup Digems</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/style.css?v=2">
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <img src="assets/logo-noname.svg" alt="Logo Topup Digems">
+        <span>Topup Digems</span>
+      </a>
+
+      <nav class="nav" id="navMenu">
+        <ul>
+          <li><a href="index.html">Beranda</a></li>
+          <li><a href="index.html#hot">Game Hot</a></li>
+          <li><a href="games.html">Semua Game</a></li>
+          <li><a href="history.html">Riwayat</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <div class="search-box">
+          <input id="searchInput" type="search" placeholder="Cari game...">
+          <button id="searchBtn" aria-label="Cari game">&#128269;</button>
+        </div>
+        <div class="auth-area" id="authArea"></div>
+        <button class="hamburger" id="hamburger" aria-label="Buka menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="auth-wrap">
+        <div class="auth-tabs">
+          <button id="tabLogin" class="active">Masuk</button>
+          <button id="tabRegister">Daftar</button>
+        </div>
+
+        <div class="auth-error" id="authError"></div>
+        <div class="auth-success" id="authSuccess" style="display:none"></div>
+
+        <!-- Form Masuk (username ATAU email + password) -->
+        <form class="auth-form" id="formLogin">
+          <label class="field">
+            <span>Username atau Email</span>
+            <input id="loginIdentifier" placeholder="Masukkan username atau email" autocomplete="username">
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input id="loginPassword" type="password" placeholder="Masukkan password" autocomplete="current-password">
+          </label>
+          <button type="submit" class="btn btn-primary btn-block">Masuk</button>
+        </form>
+
+        <!-- Form Daftar -->
+        <form class="auth-form" id="formRegister" style="display:none">
+          <label class="field">
+            <span>Username</span>
+            <input id="regUsername" placeholder="Pilih username" autocomplete="username">
+          </label>
+          <label class="field">
+            <span>Email</span>
+            <input id="regEmail" type="email" placeholder="Alamat email aktif" autocomplete="email">
+          </label>
+          <label class="field">
+            <span>Password</span>
+            <input id="regPassword" type="password" placeholder="Buat password" autocomplete="new-password">
+          </label>
+          <button type="submit" class="btn btn-primary btn-block">Daftar Sekarang</button>
+        </form>
+
+        <p class="auth-info" id="authInfo">
+          Belum punya akun? <a href="#" id="linkToRegister">Daftar di sini</a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container footer-top">
+      <div>
+        <div class="footer-logo">
+          <img src="assets/logo-noname.svg" alt="Logo Topup Digems">
+          <b>Topup Digems</b>
+        </div>
+        <p>Layanan topup game terlengkap &amp; terpercaya. Proses cepat, harga bersahabat, dan garansi aman untuk semua transaksi.</p>
+      </div>
+      <div>
+        <h4>Menu</h4>
+        <ul>
+          <li><a href="index.html">Beranda</a></li>
+          <li><a href="index.html#hot">Game Hot</a></li>
+          <li><a href="games.html">Semua Game</a></li>
+          <li><a href="login.html">Login / Daftar</a></li>
+          <li><a href="history.html">Riwayat Pembelian</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Kontak</h4>
+        <ul class="footer-contact">
+          <li>&#128222; WhatsApp: +62 851-6765-3731</li>
+          <li>&#128231; Email: admin@digems.id</li>
+          <li>&#9201; Online 24 jam</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 Topup Digems. Hak cipta dilindungi.
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>

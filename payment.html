@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pembayaran - Topup Digems</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/style.css?v=2">
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <img src="assets/logo-noname.svg" alt="Logo Topup Digems">
+        <span>Topup Digems</span>
+      </a>
+
+      <nav class="nav" id="navMenu">
+        <ul>
+          <li><a href="index.html">Beranda</a></li>
+          <li><a href="index.html#hot">Game Hot</a></li>
+          <li><a href="games.html">Semua Game</a></li>
+          <li><a href="history.html">Riwayat</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <div class="search-box">
+          <input id="searchInput" type="search" placeholder="Cari game...">
+          <button id="searchBtn" aria-label="Cari game">&#128269;</button>
+        </div>
+        <div class="auth-area" id="authArea"></div>
+        <button class="hamburger" id="hamburger" aria-label="Buka menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <h2 class="section-title">&#128176; Pembayaran Topup</h2>
+          <p class="section-sub">Isi identitas game, pilih paket, dan metode pembayaran. Transaksi langsung tercatat di Riwayat.</p>
+        </div>
+
+        <div class="pay-layout">
+          <!-- ===== KIRI: form ===== -->
+          <div class="pay-form">
+            <div class="pay-game" id="payGameInfo"></div>
+
+            <div id="payFields"></div>
+
+            <label class="field">
+              <span>No. WhatsApp <small class="field-opt">(opsional — untuk notifikasi status)</small></span>
+              <input id="payWa" placeholder="Contoh: 6285167653731" inputmode="numeric">
+            </label>
+
+            <label class="field"><span>Pilih Paket</span></label>
+            <div class="packs" id="payPacks"></div>
+            <label class="field custom-field" id="payCustomWrap" style="display:none">
+              <span>Nominal Kustom</span>
+              <input id="payCustom" type="number" min="1000" placeholder="Masukkan nominal (Rp)">
+            </label>
+
+            <label class="field"><span>Metode Pembayaran</span></label>
+            <div class="pay-methods" id="payMethods"></div>
+            <p class="pay-note" id="payNote">Pilih metode pembayaran di atas.</p>
+            <div class="pay-qr" id="payQr" style="display:none"></div>
+          </div>
+
+          <!-- ===== BAWAH: ringkasan ===== -->
+          <aside class="pay-summary">
+            <h3>Ringkasan Pesanan</h3>
+            <div class="ps-row">
+              <img id="psImg" src="assets/game-placeholder.svg" alt="">
+              <div>
+                <b id="psGame">-</b>
+                <span id="psPack">Belum pilih paket</span>
+              </div>
+            </div>
+            <div class="ps-line ps-ident"><span>Identitas</span><b id="psIdent">-</b></div>
+            <div class="ps-line"><span>Harga</span><b id="psPrice">-</b></div>
+            <div class="ps-line"><span>Biaya layanan</span><b>Gratis</b></div>
+            <div class="ps-total"><span>Total Bayar</span><b id="psTotal">-</b></div>
+            <div class="ps-margin-box" id="psMarginBox" style="display:none">
+              <div class="pmb-title">&#128176; Info Margin <em>(khusus admin)</em></div>
+              <div class="ps-line"><span>Harga Supplier</span><b id="psSup">-</b></div>
+              <div class="ps-line"><span>Harga Jual (lokal)</span><b id="psLocal">-</b></div>
+              <div class="ps-line"><span>Margin</span><b id="psMargin" class="margin-pos">-</b></div>
+            </div>
+            <button class="btn btn-primary btn-block" id="payBtn">Bayar Sekarang</button>
+            <p class="modal-note">Dengan menekan tombol, kamu setuju dengan syarat &amp; ketentuan Topup Digems.</p>
+          </aside>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container footer-top">
+      <div>
+        <div class="footer-logo">
+          <img src="assets/logo-noname.svg" alt="Logo Topup Digems">
+          <b>Topup Digems</b>
+        </div>
+        <p>Layanan topup game terlengkap &amp; terpercaya. Proses cepat, harga bersahabat, dan garansi aman untuk semua transaksi.</p>
+      </div>
+      <div>
+        <h4>Menu</h4>
+        <ul>
+          <li><a href="index.html">Beranda</a></li>
+          <li><a href="index.html#hot">Game Hot</a></li>
+          <li><a href="games.html">Semua Game</a></li>
+          <li><a href="login.html">Login / Daftar</a></li>
+          <li><a href="history.html">Riwayat Pembelian</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Game Populer</h4>
+        <ul>
+          <li><a href="games.html">Mobile Legends</a></li>
+          <li><a href="games.html">Free Fire</a></li>
+          <li><a href="games.html">PUBG Mobile</a></li>
+          <li><a href="games.html">Genshin Impact</a></li>
+          <li><a href="games.html">Valorant</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Kontak</h4>
+        <ul class="footer-contact">
+          <li>&#128222; WhatsApp: +62 851-6765-3731</li>
+          <li>&#128231; Email: admin@digems.id</li>
+          <li>&#128205; Melayani seluruh Indonesia</li>
+          <li>&#9201; Online 24 jam</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 Topup Digems. Hak cipta dilindungi.
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/payment.js"></script>
+</body>
+</html>

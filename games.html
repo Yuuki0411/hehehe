@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Semua Game - Topup Digems</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/style.css?v=2">
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <img src="assets/logo-noname.svg" alt="Logo Topup Digems">
+        <span>Topup Digems</span>
+      </a>
+
+      <nav class="nav" id="navMenu">
+        <ul>
+          <li><a href="index.html">Beranda</a></li>
+          <li><a href="index.html#hot">Game Hot</a></li>
+          <li><a href="games.html" class="active">Semua Game</a></li>
+          <li><a href="history.html">Riwayat</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <div class="search-box">
+          <input id="searchInput" type="search" placeholder="Cari game...">
+          <button id="searchBtn" aria-label="Cari game">&#128269;</button>
+        </div>
+        <div class="auth-area" id="authArea"></div>
+        <button class="hamburger" id="hamburger" aria-label="Buka menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <h2 class="section-title">&#127918; Semua Game</h2>
+        </div>
+
+        <!-- filter kategori -->
+        <div class="filter-bar">
+          <button class="chip active" data-filter="all">Semua</button>
+          <button class="chip" data-filter="hot">&#128293; Game Hot</button>
+          <button class="chip" data-filter="regular">Game Lainnya</button>
+        </div>
+
+        <!-- grid versi lengkap: kartu merah gradasi hitam -->
+        <div class="game-grid" id="gameGrid"></div>
+
+        <div class="empty" id="noResult" style="display:none">
+          &#128269; Game tidak ditemukan. Coba kata kunci lain.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container footer-top">
+      <div>
+        <div class="footer-logo">
+          <img src="assets/logo-noname.svg" alt="Logo Topup Digems">
+          <b>Topup Digems</b>
+        </div>
+        <p>Layanan topup game terlengkap &amp; terpercaya. Proses cepat, harga bersahabat, dan garansi aman untuk semua transaksi.</p>
+      </div>
+      <div>
+        <h4>Menu</h4>
+        <ul>
+          <li><a href="index.html">Beranda</a></li>
+          <li><a href="index.html#hot">Game Hot</a></li>
+          <li><a href="games.html">Semua Game</a></li>
+          <li><a href="login.html">Login / Daftar</a></li>
+          <li><a href="history.html">Riwayat Pembelian</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Game Populer</h4>
+        <ul>
+          <li><a href="games.html">Mobile Legends</a></li>
+          <li><a href="games.html">Free Fire</a></li>
+          <li><a href="games.html">PUBG Mobile</a></li>
+          <li><a href="games.html">Genshin Impact</a></li>
+          <li><a href="games.html">Valorant</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Kontak</h4>
+        <ul class="footer-contact">
+          <li>&#128222; WhatsApp: +62 851-6765-3731</li>
+          <li>&#128231; Email: admin@digems.id</li>
+          <li>&#128205; Melayani seluruh Indonesia</li>
+          <li>&#9201; Online 24 jam</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 Topup Digems. Hak cipta dilindungi.
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/games.js"></script>
+</body>
+</html>

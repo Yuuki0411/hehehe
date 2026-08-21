@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Topup Digems</title>
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg">
+  <link rel="stylesheet" href="css/style.css?v=2">
+</head>
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="container header-inner">
+      <a href="index.html" class="logo">
+        <img src="assets/logo-noname.svg" alt="Logo Topup Digems">
+        <span>Topup Digems</span>
+      </a>
+
+      <nav class="nav" id="navMenu">
+        <ul>
+          <li><a href="index.html">Beranda</a></li>
+          <li><a href="index.html#hot">Game Hot</a></li>
+          <li><a href="games.html">Semua Game</a></li>
+          <li><a href="history.html">Riwayat</a></li>
+        </ul>
+      </nav>
+
+      <div class="header-actions">
+        <div class="search-box">
+          <input id="searchInput" type="search" placeholder="Cari game...">
+          <button id="searchBtn" aria-label="Cari game">&#128269;</button>
+        </div>
+        <div class="auth-area" id="authArea"></div>
+        <button class="hamburger" id="hamburger" aria-label="Buka menu" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ===== LAYAR PASSWORD ===== -->
+    <section class="section" id="adminGate">
+      <div class="container">
+        <div class="auth-wrap">
+          <h2 class="section-title" style="text-align:center; margin-bottom:18px;">&#128274; Halaman Admin</h2>
+          <p style="color:var(--text-dim); text-align:center; font-size:0.9rem; margin-bottom:20px;">Masukkan password admin untuk melihat semua transaksi.</p>
+          <div class="auth-error" id="adminError" style="display:none"></div>
+          <label class="field auth-form" style="margin-bottom:16px;">
+            <span>Password Admin</span>
+            <input type="password" id="adminPass" placeholder="Password admin">
+          </label>
+          <button class="btn btn-primary btn-block" id="adminLoginBtn">Masuk</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== DASHBOARD ADMIN ===== -->
+    <section class="section" id="adminPanel" style="display:none">
+      <div class="container">
+        <div class="section-head">
+          <h2 class="section-title">&#128202; Dashboard Admin</h2>
+        </div>
+
+        <!-- statistik -->
+        <div class="history-stats" id="adminStats">
+          <div class="stat"><b id="aStatUsers">0</b><span>Total Akun</span></div>
+          <div class="stat"><b id="aStatTrans">0</b><span>Total Transaksi</span></div>
+          <div class="stat"><b id="aStatWait">0</b><span>Menunggu Pembayaran</span></div>
+          <div class="stat"><b id="aStatTotal">Rp0</b><span>Pendapatan (Sukses)</span></div>
+        </div>
+
+        <!-- status supplier -->
+        <div class="supplier-card" id="supplierCard">
+          <div class="supplier-head">
+            <h3>&#128737; Status Supplier Topup</h3>
+            <button class="btn btn-sm btn-primary" id="supplierPollBtn" title="Cek semua transaksi pending ke supplier sekarang">&#128260; Poll Sekarang</button>
+          </div>
+          <div class="supplier-grid" id="supplierGrid">
+            <div class="sp-item"><span>Status</span><b id="spStatus">Memuat…</b></div>
+            <div class="sp-item"><span>Mode</span><b id="spTesting">-</b></div>
+            <div class="sp-item"><span>Menunggu (Pending)</span><b id="spPending">-</b></div>
+            <div class="sp-item"><span>Poll Terakhir</span><b id="spLastPoll">-</b></div>
+          </div>
+          <p class="supplier-note" id="supplierNote"></p>
+        </div>
+
+        <!-- laporan 7 hari terakhir -->
+        <div class="week-card">
+          <div class="week-head">
+            <h3>&#128200; Laporan 7 Hari Terakhir</h3>
+            <span class="week-total" id="weekTotal">-</span>
+          </div>
+          <div class="week-chart" id="weekChart"></div>
+          <table class="week-table">
+            <thead>
+              <tr><th>Hari</th><th>Transaksi</th><th>Pendapatan</th></tr>
+            </thead>
+            <tbody id="weekTable"></tbody>
+          </table>
+        </div>
+
+        <div class="center-btn" style="text-align:left; margin-top:0; margin-bottom:20px;">
+          <button class="btn btn-primary" id="confirmAllBtn">&#9989; Konfirmasi Semua</button>
+          <button class="btn btn-outline" id="exportCsvBtn">&#128196; Ekspor CSV</button>
+          <span class="admin-hint" id="adminHint"></span>
+        </div>
+
+        <!-- daftar transaksi semua akun -->
+        <div class="history-list" id="adminList"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="footer">
+    <div class="container footer-top">
+      <div>
+        <div class="footer-logo">
+          <img src="assets/logo-noname.svg" alt="Logo Topup Digems">
+          <b>Topup Digems</b>
+        </div>
+        <p>Layanan topup game terlengkap &amp; terpercaya. Proses cepat, harga bersahabat, dan garansi aman untuk semua transaksi.</p>
+      </div>
+      <div>
+        <h4>Menu</h4>
+        <ul>
+          <li><a href="index.html">Beranda</a></li>
+          <li><a href="index.html#hot">Game Hot</a></li>
+          <li><a href="games.html">Semua Game</a></li>
+          <li><a href="login.html">Login / Daftar</a></li>
+          <li><a href="history.html">Riwayat Pembelian</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Game Populer</h4>
+        <ul>
+          <li><a href="games.html">Mobile Legends</a></li>
+          <li><a href="games.html">Free Fire</a></li>
+          <li><a href="games.html">PUBG Mobile</a></li>
+          <li><a href="games.html">Genshin Impact</a></li>
+          <li><a href="games.html">Valorant</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Kontak</h4>
+        <ul class="footer-contact">
+          <li>&#128222; WhatsApp: +62 851-6765-3731</li>
+          <li>&#128231; Email: admin@digems.id</li>
+          <li>&#128205; Melayani seluruh Indonesia</li>
+          <li>&#9201; Online 24 jam</li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 Topup Digems. Hak cipta dilindungi.
+    </div>
+  </footer>
+
+  <script src="js/data.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

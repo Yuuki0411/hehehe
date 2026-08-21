@@ -1,0 +1,27 @@
+# Node
+node_modules/
+
+# Database
+server/digems.db
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Freebuff internal
+.freebuff/
+
+# Python
+__pycache__/
+*.pyc
+
+# PDF output (optional)
+# *.pdf

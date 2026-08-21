@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="400" viewBox="0 0 600 400">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#37474f"/>
+      <stop offset="1" stop-color="#102027"/>
+    </linearGradient>
+  </defs>
+  <rect width="600" height="400" fill="url(#g)"/>
+  <path d="M300 90 l90 130 -90 100 -90 -100Z" fill="#ffffff" opacity="0.85"/>
+  <text x="300" y="330" font-size="30" font-weight="bold" text-anchor="middle" fill="#ffffff" opacity="0.9" font-family="Arial, sans-serif">Game Image</text>
+</svg>
