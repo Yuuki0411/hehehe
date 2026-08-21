@@ -121,6 +121,7 @@ async function renderAdmin() {
     : "Tidak ada transaksi yang menunggu konfirmasi.";
 
   renderWeeklyReport(rows);
+  renderPopularGames(rows);
 
   const list = document.getElementById("adminList");
   if (!rows.length) {
@@ -174,6 +175,54 @@ async function renderAdmin() {
       }
     });
   });
+}
+
+/* ---------- Game Terlaris ---------- */
+function renderPopularGames(rows) {
+  const list = document.getElementById("popularList");
+  const totalEl = document.getElementById("popularTotal");
+  if (!list) return;
+
+  if (!rows.length) {
+    list.innerHTML = '<div class="empty">Belum ada data transaksi.</div>';
+    if (totalEl) totalEl.textContent = "0 game";
+    return;
+  }
+
+  /* Hitung jumlah transaksi & revenue per game */
+  const gameMap = {};
+  rows.forEach((it) => {
+    const name = it.game || "-";
+    if (!gameMap[name]) gameMap[name] = { count: 0, revenue: 0, image: it.gameImage || "" };
+    gameMap[name].count++;
+    if (it.status === "Sukses") gameMap[name].revenue += Number(it.price || 0);
+  });
+
+  /* Sort by count descending */
+  const sorted = Object.entries(gameMap)
+    .map(([name, d]) => ({ name, count: d.count, revenue: d.revenue, image: d.image }))
+    .sort((a, b) => b.count - a.count);
+
+  if (totalEl) totalEl.textContent = sorted.length + " game";
+
+  const medals = ["&#129351;", "&#129352;", "&#129353;"];
+
+  list.innerHTML = sorted
+    .map((g, i) => {
+      const medal = i < 3 ? medals[i] : (i + 1) + ".";
+      return (
+        '<div class="history-item" style="align-items:center;">'
+        + '<img src="' + (g.image || "assets/logo-noname.svg") + '" alt="' + g.name + '" style="width:32px;height:32px;border-radius:6px;flex-shrink:0;">'
+        + '<div class="hi-info" style="flex:1;min-width:0;">'
+        + '  <h4 style="margin:0;">' + medal + ' ' + g.name + '</h4>'
+        + '  <p style="margin:2px 0 0;font-size:0.85rem;color:var(--text-dim);">'
+        + g.count + ' transaksi &middot; ' + formatRupiah(g.revenue)
+        + '</p>'
+        + '</div>'
+        + '</div>'
+      );
+    })
+    .join("");
 }
 
 /* ---------- Laporan 7 hari terakhir ---------- */
