@@ -139,12 +139,7 @@ const SUPPLIER_GAME_MATCH = {
   genshin: ["genshin impact"],
   valorant: ["valorant", "valo"],
   codm: ["call of duty mobile", "codm"],
-  roblox: ["roblox", "robux"],
-  coc: ["clash of clans", "clash of clan"],
-  hsr: ["honkai star rail", "honkai"],
   aov: ["arena of valor"],
-  higgs: ["higgs domino", "higgs"],
-  pb: ["point blank", "pointblank"],
 };
 
 /* ---------- Database SQLite ---------- */
