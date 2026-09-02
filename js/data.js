@@ -101,9 +101,6 @@ const GAMES = [
       { name: "Elite Pass", price: 72000, tag: "Pass", desc: "Rewards eksklusif sepanjang season + skin M4" },
     ],
   },
-  { slug: "ff-max", name: "Free Fire MAX", desc: "Topup Free Fire Max murah & proses otomatis.", image: "assets/games/ff-max.svg", hot: false, packs: [["70 Diamond", 10000], ["140 Diamond", 20000], ["355 Diamond", 48500], ["720 Diamond", 96000]], bundles: [
-      { name: "Monthly Membership", price: 45000, tag: "Member", desc: "Diamond harian 30 hari + hadiah mingguan" },
-    ] },
   {
     slug: "pubg", name: "PUBG Mobile", desc: "Topup UC PUBG Mobile cepat tanpa ribet.",
     image: "assets/games/pubg.svg", hot: true,

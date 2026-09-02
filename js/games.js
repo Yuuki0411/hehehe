@@ -37,7 +37,7 @@ const POPULARITY_ORDER = [
   "ff", "ml", "pubg", "roblox", "genshin",
   "hok", "clash-royale", "codm", "fc-mobile", "valorant",
   "hsr", "higgs", "garena", "zenless-zone-zero",
-  "wuthering-waves", "pokemon-unite", "aov", "pb", "ff-max",
+  "wuthering-waves", "pokemon-unite", "aov", "pb",
   "pubgm-lite", "stumble-guys", "afk-journey", "once-human",
   "blood-strike", "delta-force", "undawn", "pubg-new-state",
   "honkai-impact-3rd", "asphalt-9", "black-clover-m", "tower-of-fantasy",

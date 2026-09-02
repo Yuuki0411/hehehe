@@ -81,9 +81,6 @@ const GAME_FIELDS = {
   ff: [
     { key: "accId", label: "ID / Nickname", ph: "Contoh: 1234567890", min: 8, minMsg: "ID / nickname minimal 8 karakter." },
   ],
-  "ff-max": [
-    { key: "accId", label: "ID / Nickname", ph: "Contoh: 1234567890", min: 8, minMsg: "ID / nickname minimal 8 karakter." },
-  ],
   roblox: [
     { key: "accId", label: "Username Roblox", ph: "Contoh: player123" },
   ],
