@@ -191,6 +191,15 @@ const GAMES = [
   { slug: "fc-mobile", name: "EA Sports FC Mobile", desc: "Topup EA Sports FC Mobile termurah & terpercaya.", image: "assets/games/fc-mobile.svg", hot: false, packs: [["40 FC Points", 6400], ["100 FC Points", 14500], ["520 FC Points", 71200], ["1070 FC Points", 140000], ["2200 FC Points", 285000]] },
   { slug: "marvel-snap", name: "Marvel Snap", desc: "Topup Marvel Snap mudah & terpercaya.", image: "assets/games/marvel-snap.svg", hot: false, packs: [["100 Gold", 17000], ["250 Gold", 42000], ["500 Gold", 82000], ["1000 Gold", 160000]] },
   { slug: "metal-slug-awakening", name: "Metal Slug Awakening", desc: "Topup Metal Slug Awakening mudah.", image: "assets/games/metal-slug-awakening.svg", hot: false, packs: [["50 Diamonds", 10000], ["120 Diamonds", 23000], ["250 Diamonds", 46000], ["500 Diamonds", 90000]] },
+  {
+    slug: "roblox", name: "Roblox", desc: "Topup Robux Roblox termurah & aman.",
+    image: "assets/games/roblox.svg", hot: true,
+    packs: [["80 Robux", 16000], ["160 Robux", 32000], ["400 Robux", 78000], ["800 Robux", 155000], ["1700 Robux", 320000]],
+    bundles: [
+      { name: "Premium Membership (Roblox Premium)", price: 75000, tag: "Member", desc: "Robux bulanan + bonus + akses ke item premium" },
+      { name: "Roblox Gift Card 50k", price: 50000, tag: "Gift Card", desc: "Voucher Roblox senilai 50.000" },
+    ],
+  },
 
   /* ---------- Strategy / War / Survival ---------- */
   { slug: "rise-of-kingdoms", name: "Rise of Kingdoms", desc: "Topup Rise of Kingdoms aman & terpercaya.", image: "assets/games/rise-of-kingdoms.svg", hot: false, packs: [["320 Gems", 17000], ["800 Gems", 41000], ["1750 Gems", 88000], ["4000 Gems", 195000]] },

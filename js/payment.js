@@ -87,9 +87,6 @@ const GAME_FIELDS = {
   roblox: [
     { key: "accId", label: "Username Roblox", ph: "Contoh: player123" },
   ],
-  coc: [
-    { key: "accId", label: "Player Tag", ph: "Contoh: #ABC123", rule: "tag" },
-  ],
   "clash-royale": [
     { key: "accId", label: "Player Tag", ph: "Contoh: #ABC123", rule: "tag" },
   ],
