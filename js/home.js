@@ -73,6 +73,8 @@ async function renderHome() {
 
   const hotList = document.getElementById("hotList");
   const allGrid = document.getElementById("allGrid");
+  const gameCount = document.getElementById("gameCount");
+  if (gameCount) gameCount.textContent = "Tersedia " + games.length + " game pilihan";
   if (hotList) hotList.innerHTML = games.filter((g) => g.hot).map(cardHTML).join("");
   // versi ringkas: hanya 8 game teratas di beranda, sisanya lewat tombol "Lihat Semua Game"
   if (allGrid) allGrid.innerHTML = games.slice(0, 8).map(cardHTML).join("");
