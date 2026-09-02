@@ -36,7 +36,7 @@ let query = "";
 const POPULARITY_ORDER = [
   "ff", "ml", "pubg", "roblox", "genshin",
   "hok", "clash-royale", "codm", "fc-mobile", "valorant",
-  "hsr", "coc", "higgs", "garena", "zenless-zone-zero",
+  "hsr", "higgs", "garena", "zenless-zone-zero",
   "wuthering-waves", "pokemon-unite", "aov", "pb", "ff-max",
   "pubgm-lite", "stumble-guys", "afk-journey", "once-human",
   "blood-strike", "delta-force", "undawn", "pubg-new-state",
