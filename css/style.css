@@ -277,8 +277,8 @@ ul { list-style: none; }
 }
 .card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4); }
 
-.card-img { position: relative; aspect-ratio: 3 / 2; overflow: hidden; }
-.card-img img { width: 100%; height: 100%; object-fit: cover; }
+.card-img { position: relative; overflow: hidden; }
+.card-img img { width: 100%; display: block; object-fit: contain; background: #1a1a2e; }
 .badge-hot {
   position: absolute;
   top: 10px;
@@ -323,23 +323,13 @@ ul { list-style: none; }
 .center-btn .btn { font-size: 1.05rem; padding: 13px 30px; }
 
 /* ================= HALAMAN SEMUA GAME (versi lengkap) =================
-   Kartu: merah dengan gradasi hitam · nama game biru · deskripsi hitam */
+   Kartu: gaya sama seperti beranda */
 .full-card {
-  border-radius: var(--radius);
-  overflow: hidden;
-  background: linear-gradient(180deg, #d32f2f 0%, #8e0000 45%, #000000 100%);
-  box-shadow: var(--shadow);
-  display: flex;
-  flex-direction: column;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  transition: transform 0.2s, box-shadow 0.2s;
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
 }
-.full-card:hover { transform: translateY(-5px); box-shadow: 0 16px 34px rgba(0, 0, 0, 0.5); }
+.full-card:hover { transform: translateY(-4px); box-shadow: 0 14px 30px rgba(0, 0, 0, 0.4); }
 
-.full-card .card-img { border-bottom: 3px solid rgba(0, 0, 0, 0.55); }
-.full-card .card-body h3 { color: #1433c4; font-weight: 900; text-shadow: 0 1px 2px rgba(255, 255, 255, 0.35); }
-.full-card .card-body p { color: #000000; font-weight: 600; text-shadow: 0 1px 1px rgba(255, 255, 255, 0.25); }
-.full-card .card-price { color: #fff; text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6); }
 .full-card .card-price-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
 .full-card .pack-count {
   font-size: 0.72rem;
@@ -361,7 +351,7 @@ ul { list-style: none; }
   border-radius: 999px;
   white-space: nowrap;
 }
-.full-card .btn-white { flex: 1; }
+.full-card .btn { flex: 1; }
 
 /* filter & pencarian di halaman game */
 .filter-bar {

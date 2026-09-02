@@ -21,7 +21,7 @@ function fullCardHTML(game) {
       : "") +
     "    </div>" +
     '    <div class="card-foot">' +
-    '      <a class="btn btn-white" href="payment.html?game=' + game.slug + '">Topup Sekarang</a>' +
+    '      <a class="btn btn-primary" href="payment.html?game=' + game.slug + '">Topup Sekarang</a>' +
     "    </div>" +
     "  </div>" +
     "</article>"
