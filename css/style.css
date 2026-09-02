@@ -1185,4 +1185,19 @@ ul { list-style: none; }
 .ps-margin-box .margin-pos { color: #4ade80 !important; }
 .ps-margin-box .margin-neg { color: #f87171 !important; }
 
-
+/* ================= DESKTOP (perbesar tampilan) ================= */
+@media (min-width: 1024px) {
+  .header-inner { padding: 14px 0; }
+  .logo { font-size: 1.9rem; gap: 14px; }
+  .logo img { width: 64px; height: 64px; border-radius: 14px; }
+  .hero { height: 500px; }
+  .slide-text h2 { font-size: 3.2rem; }
+  .slide-text p { font-size: 1.3rem; }
+  .slide-text { max-width: 640px; }
+  .section { padding: 52px 0; }
+  .section-title { font-size: 1.85rem; }
+  .hot-scroll .card { min-width: 280px; max-width: 280px; }
+  .hot-scroll .card-body h3 { font-size: 1.15rem; }
+  .game-grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 22px; }
+  .center-btn .btn { font-size: 1.15rem; padding: 15px 36px; }
+}
