@@ -87,6 +87,13 @@ const GAME_FIELDS = {
   "clash-royale": [
     { key: "accId", label: "Player Tag", ph: "Contoh: #ABC123", rule: "tag" },
   ],
+  coc: [
+    { key: "accId", label: "Player Tag", ph: "Contoh: #ABC123", rule: "tag" },
+  ],
+  "magic-chess-gogo": [
+    { key: "accId", label: "ID Game", short: "ID", ph: "Contoh: 123456789", min: 8, minMsg: "ID game minimal 8 karakter." },
+    { key: "serverId", label: "Server ID", short: "Server", ph: "Contoh: 1234", rule: "digits", min: 3, minMsg: "Server ID minimal 3 angka." },
+  ],
 };
 
 const DEFAULT_FIELDS = [{ key: "accId", label: "ID / Username Game", ph: "Masukkan ID / username game kamu" }];

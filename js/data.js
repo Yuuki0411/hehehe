@@ -79,6 +79,9 @@ const GAMES = [
   { slug: "clash-royale", name: "Clash Royale", desc: "Topup Clash Royale mudah & cepat.", image: "assets/games/clash-royale.svg", hot: false, packs: [["80 Gems", 16000], ["500 Gems", 95000], ["1200 Gems", 220000], ["2500 Gems", 440000]], bundles: [
       { name: "Season Pass (Diamond Pass)", price: 85000, tag: "Pass", desc: "Rewards season: emote + skin King + 20% bonus" },
     ] },
+  { slug: "coc", name: "Clash of Clans", desc: "Topup Gems Clash of Clans mudah & cepat.", image: "assets/games/coc.svg", hot: false, packs: [["80 Gems", 16000], ["500 Gems", 80000], ["1200 Gems", 160000], ["2500 Gems", 320000], ["6500 Gems", 800000]], bundles: [
+      { name: "Gold Pass", price: 80000, tag: "Pass", desc: "Season Gold Pass: reward eksklusif + bonus 20% pertahanan" },
+    ] },
   { slug: "league-of-legends", name: "League of Legends (PC)", desc: "Topup League of Legends PC aman.", image: "assets/games/league-of-legends.svg", hot: false, packs: [["100 RP", 15000], ["250 RP", 35000], ["500 RP", 68000], ["1000 RP", 135000]] },
   {
     slug: "valorant", name: "Valorant (PC)", desc: "Topup Valorant Points (VP) murah dan legal.",
@@ -170,6 +173,9 @@ const GAMES = [
   { slug: "aether-gazer", name: "Aether Gazer", desc: "Topup Aether Gazer murah & aman.", image: "assets/games/aether-gazer.svg", hot: false, packs: [["60 Crystals", 14000], ["300 Crystals", 68000], ["980 Crystals", 215000], ["1980 Crystals", 425000]] },
   { slug: "afk-journey", name: "AFK Journey", desc: "Topup AFK Journey termurah & aman.", image: "assets/games/afk-journey.svg", hot: false, packs: [["60 Diamonds", 14000], ["300 Diamonds", 68000], ["980 Diamonds", 215000], ["1980 Diamonds", 425000]], bundles: [
       { name: "Noble Path (BP)", price: 95000, tag: "BP", desc: "Battle Pass premium: skin + Diamonds sepanjang season" },
+    ] },
+  { slug: "magic-chess-gogo", name: "Magic Chess: Go Go", desc: "Topup Diamond Magic Chess Go Go murah & cepat.", image: "assets/games/magic-chess-gogo.svg", hot: false, packs: [["5 Diamonds", 1400], ["10 Diamonds", 3500], ["50 Diamonds", 14000], ["223 Diamonds", 65000], ["336 Diamonds", 100000]], bundles: [
+      { name: "Weekly Pass", price: 35000, tag: "Pass", desc: "Diamond harian 7 hari + bonus eksklusif" },
     ] },
 
   /* ---------- Casual / Party / Racing / Sports ---------- */

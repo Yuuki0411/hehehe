@@ -140,6 +140,8 @@ const SUPPLIER_GAME_MATCH = {
   valorant: ["valorant", "valo"],
   codm: ["call of duty mobile", "codm"],
   aov: ["arena of valor"],
+  coc: ["clash of clans", "coc"],
+  "magic-chess-gogo": ["magic chess go go", "mcgg", "magic chess"],
 };
 
 /* ---------- Database SQLite ---------- */
