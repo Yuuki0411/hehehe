@@ -295,3 +295,4 @@ Catatan:
 - Halaman semua game versi lengkap: kartu **merah gradasi hitam**, nama game **biru**, deskripsi **hitam**
 - **Search engine** (header + filter di halaman game, mendukung URL `?q=`)
 - Tombol **Hubungi Admin** mengambang (kanan bawah) → langsung ke WhatsApp
+"# hehehe" 
