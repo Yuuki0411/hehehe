@@ -133,7 +133,7 @@ async function renderAdmin() {
     .map(
       (it) =>
         '<div class="history-item">' +
-        '  <img src="' + (it.gameImage || "assets/logo-noname.svg") + '" alt="' + it.game + '">' +
+        '  <img src="' + (it.gameImage || "assets/logo-digems.svg") + '" alt="' + it.game + '">' +
         '  <div class="hi-info">' +
         "    <h4>" + it.game + (it.bundle ? ' <span class="bundle-badge">&#127915;</span>' : "") + ' <span class="admin-user">@' + (it._username || "tanpa-akun") + "</span></h4>" +
         "    <p>ID Game: <b>" + it.accId + "</b> &middot; Paket: " + it.pack + (it.method ? " &middot; " + it.method : "") + "</p>" +
@@ -212,7 +212,7 @@ function renderPopularGames(rows) {
       const medal = i < 3 ? medals[i] : (i + 1) + ".";
       return (
         '<div class="history-item" style="align-items:center;">'
-        + '<img src="' + (g.image || "assets/logo-noname.svg") + '" alt="' + g.name + '" style="width:32px;height:32px;border-radius:6px;flex-shrink:0;">'
+        + '<img src="' + (g.image || "assets/logo-digems.svg") + '" alt="' + g.name + '" style="width:32px;height:32px;border-radius:6px;flex-shrink:0;">'
         + '<div class="hi-info" style="flex:1;min-width:0;">'
         + '  <h4 style="margin:0;">' + medal + ' ' + g.name + '</h4>'
         + '  <p style="margin:2px 0 0;font-size:0.85rem;color:var(--text-dim);">'

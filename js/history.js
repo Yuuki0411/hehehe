@@ -132,7 +132,7 @@ async function renderHistory() {
     .map(
       (it) =>
         '<div class="history-item">' +
-        '  <img src="' + (it.gameImage || "assets/logo-noname.svg") + '" alt="' + it.game + '">' +
+        '  <img src="' + (it.gameImage || "assets/logo-digems.svg") + '" alt="' + it.game + '">' +
         '  <div class="hi-info">' +
         "    <h4>" + it.game + (it.bundle ? ' <span class="bundle-badge">&#127915; Bundle</span>' : "") + "</h4>" +
         "    <p>ID Game: <b>" + it.accId + "</b> &middot; Paket: " + it.pack + "</p>" +

@@ -921,17 +921,7 @@ ul { list-style: none; }
   .footer-top { grid-template-columns: 1fr 1fr; }
 }
 
-/* Desktop: header penuh dan rapi */
-@media (min-width: 861px) {
-  .header-inner {
-    justify-content: space-between;
-  }
-  .header-inner > .logo { flex-shrink: 0; }
-  .header-inner > .nav { flex: 1; display: flex; justify-content: center; }
-  .header-inner > .header-actions { margin-left: auto; flex-shrink: 0; }
-}
-
-/* Desktop: header penuh dan rapi */
+/* Desktop: header rata kiri-kanan */
 @media (min-width: 861px) {
   .header-inner {
     justify-content: space-between;
