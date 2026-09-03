@@ -120,6 +120,23 @@ ul { list-style: none; }
 
 /* area auth */
 .user-name { font-weight: 700; font-size: 0.9rem; white-space: nowrap; }
+.user-logout {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  padding: 8px 14px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+  transition: filter 0.2s;
+}
+.user-logout:hover { filter: brightness(1.1); }
 /* tombol */
 .btn {
   display: inline-block;

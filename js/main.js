@@ -57,9 +57,8 @@ function renderAuthArea() {
   }
 
   if (session) {
-    html += '<span class="user-name">\u{1F464} ' + escapeHtml(session.username) + '</span>';
     html += '<a class="header-link" href="history.html">Riwayat</a>';
-    html += '<button class="btn btn-sm btn-outline" id="logoutBtn">Keluar</button>';
+    html += '<button class="user-logout" id="logoutBtn">\u{1F464} ' + escapeHtml(session.username) + ' &times;</button>';
   } else {
     html += '<a class="btn btn-sm btn-primary" href="login.html">Masuk</a>';
     html += '<a class="btn btn-sm btn-outline" href="login.html?mode=register">Daftar</a>';
