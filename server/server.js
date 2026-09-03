@@ -192,6 +192,9 @@ db.exec(`
   if (!cols.includes("email_verified")) db.exec("ALTER TABLE users ADD COLUMN email_verified INTEGER DEFAULT 0");
   if (!cols.includes("verify_token")) db.exec("ALTER TABLE users ADD COLUMN verify_token TEXT");
   if (!cols.includes("verify_token_expires")) db.exec("ALTER TABLE users ADD COLUMN verify_token_expires TEXT");
+  if (!cols.includes("photo")) db.exec("ALTER TABLE users ADD COLUMN photo TEXT");
+  if (!cols.includes("otp")) db.exec("ALTER TABLE users ADD COLUMN otp TEXT");
+  if (!cols.includes("otp_expires")) db.exec("ALTER TABLE users ADD COLUMN otp_expires TEXT");
   // akun lama (sebelum fitur verifikasi) langsung dianggap terverifikasi
   db.exec("UPDATE users SET email_verified = 1 WHERE verify_token IS NULL AND email_verified = 0");
 }
@@ -256,6 +259,51 @@ function newVerifyToken(userId) {
   db.prepare("UPDATE users SET verify_token = ?, verify_token_expires = ? WHERE id = ?")
     .run(token, expires, userId);
   return token;
+}
+
+/* Kirim kode verifikasi (OTP 6 digit) untuk perubahan akun (username/password).
+   Tanpa kredensial SMTP → cetak kode di console & kembalikan ke mode
+   pengembangan (email tidak terkirim). */
+async function sendOtpEmail(username, email, code) {
+  if (!MAIL.user || !MAIL.pass) {
+    console.log("[OTP] " + email + " → kode: " + code + "  (MAIL_USER/MAIL_PASS belum diisi, email tidak dikirim)");
+    return { sent: false };
+  }
+  try {
+    const { sendEmail } = require("./mailer");
+    await sendEmail({
+      host: MAIL.host,
+      port: MAIL.port,
+      secure: MAIL.secure,
+      user: MAIL.user,
+      pass: MAIL.pass,
+      from: MAIL.from,
+      fromName: MAIL.fromName,
+      to: email,
+      subject: "Kode Verifikasi Akun — " + MAIL.fromName,
+      text:
+        "Halo " + username + "!\n\n" +
+        "Kamu meminta perubahan data akun di " + MAIL.fromName + ".\n" +
+        "Gunakan kode verifikasi berikut (berlaku 10 menit):\n\n" +
+        code + "\n\n" +
+        "Bila kamu tidak meminta perubahan ini, abaikan email ini dan segera ganti password akunmu.\n",
+      html:
+        '<div style="max-width:520px;margin:auto;font-family:Arial,Helvetica,sans-serif;background:#fff;border:1px solid #e5e7eb;border-radius:12px;overflow:hidden">' +
+        '  <div style="background:#2563eb;padding:18px 24px"><b style="color:#fff;font-size:18px">' + MAIL.fromName + '</b></div>' +
+        '  <div style="padding:24px">' +
+        '    <h2 style="margin:0 0 12px;color:#111827;font-size:20px">Halo ' + username + '! 👋</h2>' +
+        '    <p style="color:#374151;line-height:1.6;margin:0 0 20px">Kamu meminta perubahan data akun. Gunakan kode verifikasi berikut (berlaku 10 menit):</p>' +
+        '    <div style="text-align:center;background:#f3f4f6;border-radius:10px;padding:18px;margin:0 0 20px">' +
+        '      <span style="font-size:30px;font-weight:bold;letter-spacing:8px;color:#111827">' + code + '</span></div>' +
+        '    <p style="color:#9ca3af;font-size:12px;margin:0">Bila kamu tidak meminta perubahan ini, abaikan email ini dan segera ganti password akunmu.</p>' +
+        '  </div>' +
+        '</div>',
+    });
+    return { sent: true };
+  } catch (e) {
+    console.error("[EMAIL] Gagal mengirim kode verifikasi:", e.message);
+    return { sent: false };
+  }
 }
 
 /* Kirim email verifikasi. Tanpa kredensial SMTP → cetak link di console
@@ -586,9 +634,9 @@ async function handleApi(req, res, url) {
   if (method === "GET" && p === "/api/auth/me") {
     const s = authSession(req);
     if (!s) return send(res, 401, { ok: false, error: "Sesi tidak valid." });
-    const user = db.prepare("SELECT id, username, email, email_verified FROM users WHERE id = ?").get(s.user_id);
+    const user = db.prepare("SELECT id, username, email, email_verified, photo FROM users WHERE id = ?").get(s.user_id);
     if (!user) return send(res, 401, { ok: false, error: "User tidak ditemukan." });
-    return send(res, 200, { ok: true, user: { id: user.id, username: user.username, email: user.email, verified: user.email_verified ? 1 : 0 } });
+    return send(res, 200, { ok: true, user: { id: user.id, username: user.username, email: user.email, verified: user.email_verified ? 1 : 0, photo: user.photo || "" } });
   }
 
   // POST /api/auth/register
@@ -675,6 +723,77 @@ async function handleApi(req, res, url) {
     const verifyToken = newVerifyToken(user.id);
     const mail = await sendVerificationEmail(user.username, user.email, verifyToken);
     return send(res, 200, { ok: true, mailSent: mail.sent, devVerifyUrl: mail.sent ? undefined : mail.link });
+  }
+
+  // POST /api/auth/send-code — kirim kode verifikasi (OTP) ke email user
+  // untuk perubahan data sensitif (username / password). Berlaku 10 menit.
+  if (method === "POST" && p === "/api/auth/send-code") {
+    const s = authSession(req);
+    if (!s || s.role !== "user") return send(res, 401, { ok: false, error: "Sesi tidak valid." });
+    const user = db.prepare("SELECT * FROM users WHERE id = ?").get(s.user_id);
+    if (!user) return send(res, 401, { ok: false, error: "User tidak ditemukan." });
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const expires = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+    db.prepare("UPDATE users SET otp = ?, otp_expires = ? WHERE id = ?").run(code, expires, user.id);
+    const mail = await sendOtpEmail(user.username, user.email, code);
+    return send(res, 200, { ok: true, mailSent: mail.sent, devCode: mail.sent ? undefined : code });
+  }
+
+  // POST /api/auth/update-photo — ganti foto profil (tanpa verifikasi email)
+  if (method === "POST" && p === "/api/auth/update-photo") {
+    const s = authSession(req);
+    if (!s || s.role !== "user") return send(res, 401, { ok: false, error: "Sesi tidak valid." });
+    const user = db.prepare("SELECT * FROM users WHERE id = ?").get(s.user_id);
+    if (!user) return send(res, 401, { ok: false, error: "User tidak ditemukan." });
+    const b = await readBody(req);
+    const photo = String(b.photo || "").trim().slice(0, 500000); // batasi ukuran data URL
+    db.prepare("UPDATE users SET photo = ? WHERE id = ?").run(photo || null, user.id);
+    return send(res, 200, { ok: true, user: { id: user.id, username: user.username, email: user.email, verified: user.email_verified ? 1 : 0, photo } });
+  }
+
+  // POST /api/auth/update-username — ganti username, wajib kode verifikasi email
+  if (method === "POST" && p === "/api/auth/update-username") {
+    const s = authSession(req);
+    if (!s || s.role !== "user") return send(res, 401, { ok: false, error: "Sesi tidak valid." });
+    const user = db.prepare("SELECT * FROM users WHERE id = ?").get(s.user_id);
+    if (!user) return send(res, 401, { ok: false, error: "User tidak ditemukan." });
+    const b = await readBody(req);
+    const newUsername = String(b.newUsername || "").trim();
+    const code = String(b.code || "").trim();
+    if (newUsername.length < 3) return send(res, 400, { ok: false, error: "Username minimal 3 karakter." });
+    if (!user.otp || user.otp !== code) return send(res, 400, { ok: false, error: "Kode verifikasi salah." });
+    if (new Date(user.otp_expires) < new Date()) {
+      db.prepare("UPDATE users SET otp = NULL, otp_expires = NULL WHERE id = ?").run(user.id);
+      return send(res, 400, { ok: false, error: "Kode verifikasi kedaluwarsa. Kirim ulang kode." });
+    }
+    if (db.prepare("SELECT id FROM users WHERE username = ? AND id != ?").get(newUsername, user.id)) {
+      return send(res, 409, { ok: false, error: "Username sudah dipakai." });
+    }
+    db.prepare("UPDATE users SET username = ?, otp = NULL, otp_expires = NULL WHERE id = ?").run(newUsername, user.id);
+    return send(res, 200, { ok: true, user: { id: user.id, username: newUsername, email: user.email, verified: user.email_verified ? 1 : 0, photo: user.photo || "" } });
+  }
+
+  // POST /api/auth/update-password — ganti password, wajib password lama + kode verifikasi
+  if (method === "POST" && p === "/api/auth/update-password") {
+    const s = authSession(req);
+    if (!s || s.role !== "user") return send(res, 401, { ok: false, error: "Sesi tidak valid." });
+    const user = db.prepare("SELECT * FROM users WHERE id = ?").get(s.user_id);
+    if (!user) return send(res, 401, { ok: false, error: "User tidak ditemukan." });
+    const b = await readBody(req);
+    const oldPassword = String(b.oldPassword || "");
+    const newPassword = String(b.newPassword || "");
+    const code = String(b.code || "").trim();
+    if (!verifyPassword(user, oldPassword)) return send(res, 400, { ok: false, error: "Password saat ini salah." });
+    if (newPassword.length < 6) return send(res, 400, { ok: false, error: "Password baru minimal 6 karakter." });
+    if (!user.otp || user.otp !== code) return send(res, 400, { ok: false, error: "Kode verifikasi salah." });
+    if (new Date(user.otp_expires) < new Date()) {
+      db.prepare("UPDATE users SET otp = NULL, otp_expires = NULL WHERE id = ?").run(user.id);
+      return send(res, 400, { ok: false, error: "Kode verifikasi kedaluwarsa. Kirim ulang kode." });
+    }
+    const salt = crypto.randomBytes(8).toString("hex");
+    db.prepare("UPDATE users SET password = ?, otp = NULL, otp_expires = NULL WHERE id = ?")
+      .run(salt + ":" + hashPassword(newPassword, salt), user.id);
+    return send(res, 200, { ok: true });
   }
 
   // POST /api/auth/logout — hapus sesi token dari database

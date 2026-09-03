@@ -42,6 +42,8 @@ function waNotifyURL(item) {
 }
 
 /* ---------- Header: auth area ---------- */
+const DEFAULT_AVATAR = "assets/avatar-default.svg";
+
 function renderAuthArea() {
   const area = document.getElementById("authArea");
   if (!area) return;
@@ -57,8 +59,22 @@ function renderAuthArea() {
   }
 
   if (session) {
-    html += '<a class="header-link" href="history.html">Riwayat</a>';
-    html += '<button class="user-logout" id="logoutBtn">\u{1F464} ' + escapeHtml(session.username) + ' &times;</button>';
+    const photo = session.photo || DEFAULT_AVATAR;
+    html +=
+      '<div class="user-menu" id="userMenu">' +
+      '  <button type="button" class="avatar-btn" id="avatarBtn" aria-label="Menu profil" aria-expanded="false">' +
+      '    <img src="' + photo + '" alt="Foto profil" onerror="this.onerror=null;this.src=\'' + DEFAULT_AVATAR + '\'">' +
+      '  </button>' +
+      '  <div class="user-dropdown" id="userDropdown" hidden>' +
+      '    <div class="dd-head">' +
+      '      <img src="' + photo + '" alt="" onerror="this.onerror=null;this.src=\'' + DEFAULT_AVATAR + '\'">' +
+      '      <div><b>' + escapeHtml(session.username) + '</b><span>' + escapeHtml(session.email) + '</span></div>' +
+      '    </div>' +
+      '    <button type="button" class="dd-item" id="ddProfile">&#128100; Profil</button>' +
+      '    <a class="dd-item" href="history.html">&#128203; Riwayat</a>' +
+      '    <button type="button" class="dd-item dd-danger" id="ddLogout">&#128682; Keluar</button>' +
+      '  </div>' +
+      '</div>';
   } else {
     html += '<a class="btn btn-sm btn-primary" href="login.html">Masuk</a>';
     html += '<a class="btn btn-sm btn-outline" href="login.html?mode=register">Daftar</a>';
@@ -67,13 +83,214 @@ function renderAuthArea() {
   html += '</div>';
   area.innerHTML = html;
 
-  const logoutBtn = document.getElementById("logoutBtn");
-  if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
+  if (session) {
+    const btn = document.getElementById("avatarBtn");
+    const dd = document.getElementById("userDropdown");
+
+    const openDropdown = (open) => {
+      dd.hidden = !open;
+      btn.classList.toggle("open", open);
+      btn.setAttribute("aria-expanded", open);
+    };
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openDropdown(dd.hidden);
+    });
+    // tutup dropdown saat klik di luar
+    document.addEventListener("click", (e) => {
+      if (!dd.hidden && !e.target.closest("#userMenu")) openDropdown(false);
+    });
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !dd.hidden) openDropdown(false);
+    });
+
+    document.getElementById("ddProfile").addEventListener("click", () => {
+      openDropdown(false);
+      openProfileModal();
+    });
+    document.getElementById("ddLogout").addEventListener("click", () => {
       GameService.logout();
       window.location.reload();
     });
   }
+}
+
+/* ---------- Modal Profil (foto / username / password) ---------- */
+function ensureProfileModal() {
+  if (document.getElementById("profileModal")) return;
+  const m = document.createElement("div");
+  m.id = "profileModal";
+  m.className = "modal-overlay";
+  m.style.display = "none";
+  m.innerHTML =
+    '<div class="modal profile-modal">' +
+    '  <button class="modal-close" id="profileModalClose" aria-label="Tutup">&times;</button>' +
+    '  <div class="modal-head"><h3>&#128100; Profil Saya</h3></div>' +
+    // Foto profil
+    '  <section class="prof-sec">' +
+    '    <h4>Foto Profil</h4>' +
+    '    <div class="prof-photo-row">' +
+    '      <img id="pfpPreview" alt="Foto profil">' +
+    '      <div class="prof-photo-actions">' +
+    '        <input type="file" id="pfpFile" accept="image/*" hidden>' +
+    '        <button type="button" class="btn btn-sm btn-outline" id="pfpChoose">Pilih Foto</button>' +
+    '        <button type="button" class="btn btn-sm btn-primary" id="pfpSave" hidden>Simpan Foto</button>' +
+    '        <p class="msg" id="pfpMsg"></p>' +
+    '      </div>' +
+    '    </div>' +
+    '  </section>' +
+    '  <hr class="prof-div">' +
+    // Ganti username
+    '  <section class="prof-sec">' +
+    '    <h4>Ganti Username</h4>' +
+    '    <p class="prof-info">Perubahan username perlu verifikasi: kode dikirim ke email <b id="puEmail"></b>.</p>' +
+    '    <label class="field"><span>Username baru</span><input id="puUsername" placeholder="Username baru" autocomplete="off"></label>' +
+    '    <div class="prof-otp">' +
+    '      <label class="field otp-input"><span>Kode verifikasi</span><input id="puCode" inputmode="numeric" maxlength="6" placeholder="6 digit" autocomplete="one-time-code"></label>' +
+    '      <button type="button" class="btn btn-sm btn-outline otp-btn" id="puSend">Kirim Kode</button>' +
+    '    </div>' +
+    '    <button type="button" class="btn btn-primary btn-block" id="puSave">Simpan Username</button>' +
+    '    <p class="msg" id="puMsg"></p>' +
+    '  </section>' +
+    '  <hr class="prof-div">' +
+    // Ganti password
+    '  <section class="prof-sec">' +
+    '    <h4>Ganti Password</h4>' +
+    '    <p class="prof-info">Perubahan password perlu verifikasi: kode dikirim ke email <b id="ppEmail"></b>.</p>' +
+    '    <label class="field"><span>Password saat ini</span><input id="ppCurrent" type="password" placeholder="Password saat ini" autocomplete="current-password"></label>' +
+    '    <label class="field"><span>Password baru</span><input id="ppNew" type="password" placeholder="Minimal 6 karakter" autocomplete="new-password"></label>' +
+    '    <div class="prof-otp">' +
+    '      <label class="field otp-input"><span>Kode verifikasi</span><input id="ppCode" inputmode="numeric" maxlength="6" placeholder="6 digit" autocomplete="one-time-code"></label>' +
+    '      <button type="button" class="btn btn-sm btn-outline otp-btn" id="ppSend">Kirim Kode</button>' +
+    '    </div>' +
+    '    <button type="button" class="btn btn-primary btn-block" id="ppSave">Simpan Password</button>' +
+    '    <p class="msg" id="ppMsg"></p>' +
+    '  </section>' +
+    '</div>';
+  document.body.appendChild(m);
+
+  const closeModal = () => {
+    m.style.display = "none";
+    document.body.style.overflow = "";
+  };
+  m.addEventListener("click", (e) => {
+    if (e.target === m) closeModal();
+  });
+  document.getElementById("profileModalClose").addEventListener("click", closeModal);
+
+  const session = () => GameService.getSession();
+  const setMsg = (id, text, isError) => {
+    const el = document.getElementById(id);
+    el.textContent = text || "";
+    el.className = "msg" + (isError ? " error" : " ok");
+  };
+
+  // --- Foto profil ---
+  document.getElementById("pfpChoose").addEventListener("click", () => {
+    document.getElementById("pfpFile").click();
+  });
+  document.getElementById("pfpFile").addEventListener("change", (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (!file) return;
+    cropImageToDataUrl(file, 256, (dataUrl) => {
+      if (!dataUrl) return setMsg("pfpMsg", "Gagal membaca gambar.", true);
+      document.getElementById("pfpPreview").src = dataUrl;
+      document.getElementById("pfpSave").hidden = false;
+      setMsg("pfpMsg", "");
+    });
+  });
+  document.getElementById("pfpSave").addEventListener("click", async () => {
+    const dataUrl = document.getElementById("pfpPreview").src;
+    if (!dataUrl || dataUrl === DEFAULT_AVATAR) return;
+    const r = await GameService.updatePhoto(dataUrl);
+    if (r.ok) {
+      setMsg("pfpMsg", "Foto profil berhasil diubah.", false);
+      document.getElementById("pfpSave").hidden = true;
+      renderAuthArea();
+    } else {
+      setMsg("pfpMsg", r.error || "Gagal menyimpan foto.", true);
+    }
+  });
+
+  // --- Kirim kode verifikasi (username & password) ---
+  const wireSend = (btnId, msgId, cb) => {
+    document.getElementById(btnId).addEventListener("click", async () => {
+      const r = await GameService.sendChangeCode();
+      if (!r.ok) return setMsg(msgId, r.error || "Gagal mengirim kode.", true);
+      setMsg(msgId, r.mailSent
+        ? "Kode verifikasi terkirim ke email kamu — cek inbox/spam."
+        : "Mode pengembangan — kode verifikasi kamu: " + r.devCode, false);
+      cb && cb();
+    });
+  };
+  wireSend("puSend", "puMsg");
+  wireSend("ppSend", "ppMsg");
+
+  // --- Simpan username ---
+  document.getElementById("puSave").addEventListener("click", async () => {
+    const newUsername = document.getElementById("puUsername").value.trim();
+    const code = document.getElementById("puCode").value.trim();
+    if (newUsername.length < 3) return setMsg("puMsg", "Username minimal 3 karakter.", true);
+    if (!code) return setMsg("puMsg", "Masukkan kode verifikasi (klik Kirim Kode dulu).", true);
+    const r = await GameService.updateUsername(newUsername, code);
+    if (!r.ok) return setMsg("puMsg", r.error || "Gagal mengganti username.", true);
+    setMsg("puMsg", "Username berhasil diganti!", false);
+    document.getElementById("puUsername").value = "";
+    document.getElementById("puCode").value = "";
+    renderAuthArea();
+  });
+
+  // --- Simpan password ---
+  document.getElementById("ppSave").addEventListener("click", async () => {
+    const oldPassword = document.getElementById("ppCurrent").value;
+    const newPassword = document.getElementById("ppNew").value;
+    const code = document.getElementById("ppCode").value.trim();
+    if (!oldPassword) return setMsg("ppMsg", "Masukkan password saat ini.", true);
+    if (newPassword.length < 6) return setMsg("ppMsg", "Password baru minimal 6 karakter.", true);
+    if (!code) return setMsg("ppMsg", "Masukkan kode verifikasi (klik Kirim Kode dulu).", true);
+    const r = await GameService.updatePassword(oldPassword, newPassword, code);
+    if (!r.ok) return setMsg("ppMsg", r.error || "Gagal mengganti password.", true);
+    setMsg("ppMsg", "Password berhasil diganti!", false);
+    document.getElementById("ppCurrent").value = "";
+    document.getElementById("ppNew").value = "";
+    document.getElementById("ppCode").value = "";
+  });
+}
+
+function openProfileModal() {
+  ensureProfileModal();
+  const s = GameService.getSession();
+  if (!s) return alert("Silakan login terlebih dahulu.");
+
+  const photo = s.photo || DEFAULT_AVATAR;
+  document.getElementById("pfpPreview").src = photo;
+  document.getElementById("pfpSave").hidden = true;
+  document.getElementById("pfpFile").value = "";
+  document.getElementById("puEmail").textContent = s.email;
+  document.getElementById("ppEmail").textContent = s.email;
+  ["pfpMsg", "puMsg", "ppMsg"].forEach((id) => { document.getElementById(id).textContent = ""; });
+
+  document.getElementById("profileModal").style.display = "flex";
+  document.body.style.overflow = "hidden";
+}
+
+/* Baca file gambar, potong jadi persegi, perkecil → data URL JPEG. */
+function cropImageToDataUrl(file, size, cb) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const side = Math.min(img.width, img.height);
+      const canvas = document.createElement("canvas");
+      canvas.width = size;
+      canvas.height = size;
+      canvas.getContext("2d").drawImage(img, (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, size, size);
+      cb(canvas.toDataURL("image/jpeg", 0.85));
+    };
+    img.onerror = () => cb(null);
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
 }
 
 function escapeHtml(s) {

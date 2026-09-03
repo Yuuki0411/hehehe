@@ -27,6 +27,10 @@ const API_CONFIG = {
     me: "/auth/me",
     verify: "/auth/verify",
     resend: "/auth/resend",
+    sendCode: "/auth/send-code",
+    updatePhoto: "/auth/update-photo",
+    updateUsername: "/auth/update-username",
+    updatePassword: "/auth/update-password",
     history: "/history",
     purchase: "/purchase",
     cancel: "/purchase/cancel",
@@ -193,6 +197,7 @@ const GameService = {
           username: data.user.username,
           email: data.user.email,
           verified: data.user.verified ? 1 : 0,
+          photo: data.user.photo || "",
         });
         return { ok: true, user: data.user, error: "", needsVerification: !data.user.verified };
       }
@@ -221,6 +226,7 @@ const GameService = {
           username: data.user.username,
           email: data.user.email,
           verified: data.user.verified ? 1 : 0,
+          photo: data.user.photo || "",
         });
         return {
           ok: true,
@@ -266,7 +272,7 @@ const GameService = {
     if (data && data.ok && data.user) {
       const s = LocalStore.getSession();
       if (s) {
-        LocalStore.setSession({ ...s, verified: data.user.verified ? 1 : 0 });
+        LocalStore.setSession({ ...s, verified: data.user.verified ? 1 : 0, photo: data.user.photo || "" });
       }
       return data.user;
     }
@@ -278,6 +284,97 @@ const GameService = {
     if (API_CONFIG.enabled) apiRequest(API_CONFIG.endpoints.logout, "POST", {});
     LocalStore.clearSession();
     localStorage.removeItem("digems_token");
+  },
+
+  /* Kirim kode verifikasi (OTP 6 digit) ke email user untuk perubahan
+     username / password. Tanpa SMTP → kode dikembalikan (mode pengembangan). */
+  async sendChangeCode() {
+    const data = await apiRequest(API_CONFIG.endpoints.sendCode, "POST", {});
+    if (data) {
+      if (data.ok) return { ok: true, mailSent: !!data.mailSent, devCode: data.devCode || "" };
+      return { ok: false, error: data.error || "Gagal mengirim kode." };
+    }
+    // Fallback lokal (server tidak terjangkau)
+    const session = LocalStore.getSession();
+    if (!session) return { ok: false, error: "Sesi tidak valid." };
+    const users = LocalStore.getUsers();
+    const u = users.find((x) => x.id === session.uid);
+    if (!u) return { ok: false, error: "User tidak ditemukan." };
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    u.otp = code;
+    u.otpExpires = Date.now() + 10 * 60 * 1000;
+    LocalStore.saveUsers(users);
+    return { ok: true, mailSent: false, devCode: code };
+  },
+
+  /* Ganti foto profil (data URL). Tidak butuh verifikasi email. */
+  async updatePhoto(photo) {
+    const data = await apiRequest(API_CONFIG.endpoints.updatePhoto, "POST", { photo });
+    if (data) {
+      if (data.ok) {
+        const s = LocalStore.getSession();
+        if (s) LocalStore.setSession({ ...s, photo: data.user.photo || "" });
+        return { ok: true, user: data.user };
+      }
+      return { ok: false, error: data.error || "Gagal menyimpan foto." };
+    }
+    // Fallback lokal
+    const s = LocalStore.getSession();
+    if (!s) return { ok: false, error: "Sesi tidak valid." };
+    const users = LocalStore.getUsers();
+    const u = users.find((x) => x.id === s.uid);
+    if (u) { u.photo = photo; LocalStore.saveUsers(users); }
+    LocalStore.setSession({ ...s, photo });
+    return { ok: true };
+  },
+
+  /* Ganti username — wajib kode verifikasi email. */
+  async updateUsername(newUsername, code) {
+    const data = await apiRequest(API_CONFIG.endpoints.updateUsername, "POST", { newUsername, code });
+    if (data) {
+      if (data.ok) {
+        const s = LocalStore.getSession();
+        if (s) LocalStore.setSession({ ...s, username: data.user.username });
+        return { ok: true, user: data.user };
+      }
+      return { ok: false, error: data.error || "Gagal mengganti username." };
+    }
+    // Fallback lokal
+    const s = LocalStore.getSession();
+    if (!s) return { ok: false, error: "Sesi tidak valid." };
+    const users = LocalStore.getUsers();
+    const u = users.find((x) => x.id === s.uid);
+    if (!u) return { ok: false, error: "User tidak ditemukan." };
+    if (!u.otp || u.otp !== code) return { ok: false, error: "Kode verifikasi salah." };
+    if (Date.now() > (u.otpExpires || 0)) return { ok: false, error: "Kode verifikasi kedaluwarsa. Kirim ulang kode." };
+    if (users.some((x) => x.username === newUsername && x.id !== s.uid)) return { ok: false, error: "Username sudah dipakai." };
+    u.username = newUsername;
+    u.otp = null;
+    LocalStore.saveUsers(users);
+    LocalStore.setSession({ ...s, username: newUsername });
+    return { ok: true };
+  },
+
+  /* Ganti password — wajib password lama + kode verifikasi email. */
+  async updatePassword(oldPassword, newPassword, code) {
+    const data = await apiRequest(API_CONFIG.endpoints.updatePassword, "POST", { oldPassword, newPassword, code });
+    if (data) {
+      if (data.ok) return { ok: true };
+      return { ok: false, error: data.error || "Gagal mengganti password." };
+    }
+    // Fallback lokal
+    const s = LocalStore.getSession();
+    if (!s) return { ok: false, error: "Sesi tidak valid." };
+    const users = LocalStore.getUsers();
+    const u = users.find((x) => x.id === s.uid);
+    if (!u) return { ok: false, error: "User tidak ditemukan." };
+    if (u.password !== oldPassword) return { ok: false, error: "Password saat ini salah." };
+    if (!u.otp || u.otp !== code) return { ok: false, error: "Kode verifikasi salah." };
+    if (Date.now() > (u.otpExpires || 0)) return { ok: false, error: "Kode verifikasi kedaluwarsa. Kirim ulang kode." };
+    u.password = newPassword;
+    u.otp = null;
+    LocalStore.saveUsers(users);
+    return { ok: true };
   },
 
   /* Histori pembelian user yang sedang login */
