@@ -57,6 +57,7 @@ function renderAuthArea() {
   }
 
   if (session) {
+    html += '<span class="user-name">\u{1F464} ' + escapeHtml(session.username) + '</span>';
     html += '<a class="header-link" href="history.html">Riwayat</a>';
     html += '<button class="btn btn-sm btn-outline" id="logoutBtn">Keluar</button>';
   } else {
