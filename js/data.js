@@ -9,7 +9,7 @@
 
 const SITE = {
   name: "Topup Digems",
-  logo: "assets/logo-noname.svg",   // logo di header (ikon digems, ganti dengan gambar sendiri)
+  logo: "assets/logo-digems.svg",   // logo di header (ikon digems)
   title: "Topup Digems - Topup Game Termurah & Terpercaya",
   whatsapp: "6285167653731",         // nomor WhatsApp admin (format internasional tanpa +)
   whatsappMessage: "Halo admin Digems, saya mau topup game. Boleh dibantu?",
