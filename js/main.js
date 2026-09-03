@@ -41,29 +41,38 @@ function waNotifyURL(item) {
   return "https://wa.me/" + item.wa + "?text=" + encodeURIComponent(msg);
 }
 
-/* ---------- Header: auth area (login/daftar vs user) ---------- */
+/* ---------- Header: auth area ---------- */
 function renderAuthArea() {
   const area = document.getElementById("authArea");
   if (!area) return;
   const session = GameService.getSession();
+  const isIndex = /index\.html/i.test(window.location.pathname) || window.location.pathname === '/' || window.location.pathname === '';
+
+  let html = '<div class="header-nav">';
+
+  if (isIndex) {
+    html += '<a class="header-link" href="games.html">Semua Game</a>';
+  } else {
+    html += '<a class="header-link" href="index.html">Beranda</a>';
+  }
 
   if (session) {
-    area.innerHTML =
-      '<div class="user-box">' +
-      '  <span class="user-name">👤 ' + escapeHtml(session.username) + '</span>' +
-      '  <a class="btn btn-sm btn-outline" href="history.html">Riwayat</a>' +
-      '  <button class="btn btn-sm btn-outline" id="logoutBtn">Keluar</button>' +
-      "</div>";
-    document.getElementById("logoutBtn").addEventListener("click", () => {
+    html += '<a class="header-link" href="history.html">Riwayat</a>';
+    html += '<button class="btn btn-sm btn-outline" id="logoutBtn">Keluar</button>';
+  } else {
+    html += '<a class="btn btn-sm btn-primary" href="login.html">Masuk</a>';
+    html += '<a class="btn btn-sm btn-outline" href="login.html?mode=register">Daftar</a>';
+  }
+
+  html += '</div>';
+  area.innerHTML = html;
+
+  const logoutBtn = document.getElementById("logoutBtn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
       GameService.logout();
       window.location.reload();
     });
-  } else {
-    area.innerHTML =
-      '<div class="user-box">' +
-      '  <a class="btn btn-sm btn-primary" href="login.html">Masuk</a>' +
-      '  <a class="btn btn-sm btn-outline" href="login.html?mode=register">Daftar</a>' +
-      "</div>";
   }
 }
 
@@ -106,20 +115,20 @@ function renderVerifyBanner() {
 /* ---------- Toggle menu mobile / pad ---------- */
 function initNav() {
   const burger = document.getElementById("hamburger");
-  const nav = document.getElementById("navMenu");
-  if (!burger || !nav) return;
+  const actions = document.getElementById("headerActions");
+  if (!burger || !actions) return;
   burger.addEventListener("click", () => {
-    const open = nav.classList.toggle("open");
+    const open = actions.classList.toggle("open");
     burger.classList.toggle("active", open);
     burger.setAttribute("aria-expanded", open);
   });
   // tutup menu saat link diklik (mobile)
-  nav.querySelectorAll("a").forEach((a) =>
-    a.addEventListener("click", () => {
-      nav.classList.remove("open");
+  actions.addEventListener("click", (e) => {
+    if (e.target.tagName === "A" || e.target.tagName === "BUTTON") {
+      actions.classList.remove("open");
       burger.classList.remove("active");
-    })
-  );
+    }
+  });
 }
 
 /* ---------- Pencarian game ---------- */
