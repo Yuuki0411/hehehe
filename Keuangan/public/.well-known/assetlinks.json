@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "com.yuuki.catatankeuangan",
+        "sha256_cert_fingerprints": ["2A:C8:A7:EF:45:FC:A0:2E:C1:39:13:BD:D4:83:F9:53:23:9A:74:F3:71:5C:8E:22:76:9A:EE:77:02:76:C7:10"]
+      }
+    }]

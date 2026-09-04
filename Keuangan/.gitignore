@@ -1,0 +1,21 @@
+node_modules
+dist
+dev-dist
+*.local
+
+# Artefak build/salinan lokal (tidak perlu di-commit)
+aa/
+Keuangan.apk
+vibe_images/
+*.log
+
+# Kredensial Supabase (isi sendiri dari .env.example)
+.env
+.env.*
+!.env.example
+
+# Local Netlify folder
+.netlify
+
+# Supabase CLI temp (jangan di-commit)
+supabase/.temp/

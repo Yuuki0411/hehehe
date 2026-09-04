@@ -114,6 +114,32 @@ const SUPPLIER = {
   pollMs: Math.max(5000, Number(process.env.SUPPLIER_POLL_MS || 30000)),
 };
 
+/* ---------- Sinkronisasi otomatis ke aplikasi "Catatan Keuangan" ----------
+   Setiap transaksi yang berstatus Sukses otomatis dicatat sebagai PEMASUKAN
+   (income) di aplikasi Catatan Keuangan (folder Keuangan/ — React + Supabase).
+   Aktifkan dengan env berikut; tanpa env ini server jalan normal tanpa kirim:
+
+     KEUANGAN_SUPABASE_URL=https://xxxx.supabase.co
+     KEUANGAN_SUPABASE_SERVICE_KEY=eyJ...    (service_role key — RAHASIA)
+     KEUANGAN_OWNER_USER_ID=<auth.users.id pemilik catatan keuangan>
+     KEUANGAN_CATEGORY_NAME=Topup Game (Digems)   (opsional)
+     KEUANGAN_WALLET_NAME=Kas                     (opsional)
+
+   Dipakai API REST PostgREST lewat fetch bawaan Node — tanpa dependency baru.
+   Service key dipakai agar baris bisa ditulis atas nama pemilik meski Row
+   Level Security aktif. Lihat folder Keuangan/ untuk aplikasi penerimanya. */
+const FINANCE = {
+  url: String(process.env.KEUANGAN_SUPABASE_URL || "").replace(/\/+$/, ""),
+  key: process.env.KEUANGAN_SUPABASE_SERVICE_KEY || "",
+  ownerId: process.env.KEUANGAN_OWNER_USER_ID || "",
+  categoryName: process.env.KEUANGAN_CATEGORY_NAME || "Topup Game (Digems)",
+  walletName: process.env.KEUANGAN_WALLET_NAME || "Kas",
+};
+
+function financeEnabled() {
+  return Boolean(FINANCE.url && FINANCE.key && FINANCE.ownerId);
+}
+
 /* ---------- Data game (dari js/data.js) ----------
    Server mengevaluasi js/data.js (murni data, tanpa DOM) untuk mendapatkan
    GAMES — dipakai endpoint GET /api/games agar HARGa & produk game
@@ -398,6 +424,7 @@ function insertTransaction(uid, t) {
     t.status || "Menunggu Pembayaran", t.note || "", t.refId || "", t.sn || "",
     t.bundle ? 1 : 0, t.date || now()
   );
+  if (t.status === "Sukses") queueFinanceSync(id); // langsung tercatat di Catatan Keuangan
   return id;
 }
 
@@ -409,6 +436,133 @@ function updateStatus(id, status, note, col) {
   db.prepare(
     `UPDATE transactions SET status = ?, note = ?, ${col} = ? WHERE id = ?`
   ).run(status, note, now(), id);
+  if (status === "Sukses") queueFinanceSync(id); // sinkron ke Catatan Keuangan
+}
+
+/* ---------- Sinkronisasi ke Catatan Keuangan (Supabase) ---------- */
+
+/* Memo hasil lookup kategori & dompet pemasukan (sekali per proses) */
+const financeRefs = { categoryId: null, walletId: null };
+
+async function financeReq(method, path, body) {
+  const res = await fetch(FINANCE.url + path, {
+    method,
+    headers: {
+      apikey: FINANCE.key,
+      Authorization: "Bearer " + FINANCE.key,
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  });
+  const text = await res.text();
+  let json = null;
+  try { json = text ? JSON.parse(text) : null; } catch { /* bukan JSON */ }
+  if (!res.ok) throw new Error("Supabase " + res.status + ": " + (text || ""));
+  return json;
+}
+
+/* Kategori pemasukan untuk topup — buat bila belum ada (id di-cache). */
+async function financeCategoryId() {
+  if (financeRefs.categoryId) return financeRefs.categoryId;
+  const list = await financeReq("GET",
+    "/rest/v1/categories?user_id=eq." + FINANCE.ownerId +
+    "&type=eq.income&name=eq." + encodeURIComponent(FINANCE.categoryName) +
+    "&select=id&limit=1");
+  if (Array.isArray(list) && list.length) {
+    financeRefs.categoryId = list[0].id;
+    return financeRefs.categoryId;
+  }
+  const rows = await financeReq("POST", "/rest/v1/categories", {
+    user_id: FINANCE.ownerId,
+    name: FINANCE.categoryName,
+    type: "income",
+  });
+  financeRefs.categoryId = (Array.isArray(rows) && rows[0] && rows[0].id) || null;
+  return financeRefs.categoryId;
+}
+
+/* Dompet tujuan (paling lama dibuat; buat bila akun belum punya dompet). */
+async function financeWalletId() {
+  if (financeRefs.walletId) return financeRefs.walletId;
+  const list = await financeReq("GET",
+    "/rest/v1/wallets?user_id=eq." + FINANCE.ownerId +
+    "&select=id&order=created_at.asc&limit=1");
+  if (Array.isArray(list) && list.length) {
+    financeRefs.walletId = list[0].id;
+    return financeRefs.walletId;
+  }
+  const rows = await financeReq("POST", "/rest/v1/wallets", {
+    user_id: FINANCE.ownerId,
+    name: FINANCE.walletName,
+  });
+  financeRefs.walletId = (Array.isArray(rows) && rows[0] && rows[0].id) || null;
+  return financeRefs.walletId;
+}
+
+/* Tanggal transaksi (ISO / dd/MM/yyyy) → YYYY-MM-DD untuk kolom occurred_on */
+function financeDate(raw) {
+  const s = String(raw || "");
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (m) return m[1] + "-" + m[2] + "-" + m[3];
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (m) return m[3] + "-" + String(m[2]).padStart(2, "0") + "-" + String(m[1]).padStart(2, "0");
+  const t = new Date(s);
+  return isNaN(t.getTime()) ? now().slice(0, 10) : t.toISOString().slice(0, 10);
+}
+
+/* Catatan pemasukan: format sama dengan fitur Impor CSV di aplikasi Keuangan,
+   jadi baris yang sama tidak akan dobel walau dikirim lewat jalur berbeda. */
+function financeNote(row) {
+  const ref = row.refId ? " (Ref " + String(row.refId).trim() + ")" : "";
+  const base = "Topup " + ((row.game || "Game").trim() + " — " + (row.pack || "").trim());
+  return base.replace(/\s+/g, " ").trim().slice(0, 300) + ref;
+}
+
+/* Kirim 1 transaksi Sukses sebagai pemasukan. Dipanggil async (tidak
+   memblokir respons HTTP). Lewati bila baris identik sudah pernah ada. */
+async function pushIncomeToFinance(row) {
+  if (!financeEnabled() || !row) return { skipped: true };
+  const amount = Number(row.price);
+  if (!(amount > 0)) return { skipped: true };
+  try {
+    const categoryId = await financeCategoryId();
+    const walletId = await financeWalletId();
+    if (!categoryId || !walletId) {
+      console.error("[FINANCE] Kategori/dompet gagal disiapkan, lewati:", row.id);
+      return { skipped: true };
+    }
+    const note = financeNote(row);
+    const occurred_on = financeDate(row.date);
+    const dup = await financeReq("GET",
+      "/rest/v1/transactions?user_id=eq." + FINANCE.ownerId +
+      "&type=eq.income&amount=eq." + amount +
+      "&occurred_on=eq." + occurred_on +
+      "&note=eq." + encodeURIComponent(note) +
+      "&select=id&limit=1");
+    if (Array.isArray(dup) && dup.length) return { skipped: true, duplicate: true };
+    await financeReq("POST", "/rest/v1/transactions", {
+      user_id: FINANCE.ownerId,
+      type: "income",
+      amount,
+      category_id: categoryId,
+      wallet_id: walletId,
+      occurred_on,
+      note,
+    });
+    console.log("[FINANCE] Terkirim ke Catatan Keuangan:", note, "— Rp" + amount.toLocaleString("id-ID"));
+    return { ok: true };
+  } catch (e) {
+    console.error("[FINANCE] Gagal kirim transaksi " + (row && row.id) + ":", e && e.message || e);
+    return { ok: false, error: e && e.message || String(e) };
+  }
+}
+
+/* Panggil pushIncomeToFinance tanpa menunggu (fire-and-forget) */
+function queueFinanceSync(id) {
+  const row = findTransaction(id);
+  if (!row || !financeEnabled()) return;
+  Promise.resolve(pushIncomeToFinance(row)).catch(() => {});
 }
 
 /* ---------- Supplier: sign, price-list, topup, cek status ---------- */
@@ -567,6 +721,7 @@ async function pollSupplierStatus() {
         db.prepare(
           `UPDATE transactions SET status = 'Sukses', note = ?, sn = ?, confirmed_at = ? WHERE id = ?`
         ).run(note, st.sn || "", now(), row.id);
+        queueFinanceSync(row.id);
       } else {
         db.prepare(
           `UPDATE transactions SET status = 'Gagal', note = ?, cancelled_at = ? WHERE id = ?`
@@ -1036,6 +1191,11 @@ server.listen(PORT, () => {
     console.log("  Polling   : cek status tiap " + SUPPLIER.pollMs + " ms");
   } else {
     console.log("  Supplier  : nonaktif (set SUPPLIER_ENABLED=1 + SUPPLIER_USERNAME + SUPPLIER_APIKEY)");
+  }
+  if (financeEnabled()) {
+    console.log("  Finance   : AKTIF → " + FINANCE.url);
+  } else {
+    console.log("  Finance   : nonaktif (isi KEUANGAN_SUPABASE_URL + KEUANGAN_SUPABASE_SERVICE_KEY + KEUANGAN_OWNER_USER_ID)");
   }
   console.log("==============================================");
 
