@@ -288,7 +288,7 @@ Catatan:
 
 - Header putih **sticky** dengan font biru
 - Body abu-abu dengan font putih; footer hitam dengan font putih ke abu-abu
-- Responsif: di tablet/mobile menu berubah menjadi **toggle menu** (hamburger)
+- Responsif: di tablet/mobile **search bar** tampil penuh di baris bawah header (tanpa toggle menu)
 - **Login/daftar** via username atau email + **histori pembelian** per akun
 - **Slide gambar** otomatis (bisa diganti dengan self image)
 - **Game Hot/Trending** (versi ringkas, scroll horizontal) & **Semua Game** (versi ringkas) + tombol **Lihat Semua Game**

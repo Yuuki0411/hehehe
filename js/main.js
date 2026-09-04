@@ -329,25 +329,6 @@ function renderVerifyBanner() {
   });
 }
 
-/* ---------- Toggle menu mobile / pad ---------- */
-function initNav() {
-  const burger = document.getElementById("hamburger");
-  const actions = document.getElementById("headerActions");
-  if (!burger || !actions) return;
-  burger.addEventListener("click", () => {
-    const open = actions.classList.toggle("open");
-    burger.classList.toggle("active", open);
-    burger.setAttribute("aria-expanded", open);
-  });
-  // tutup menu saat link diklik (mobile)
-  actions.addEventListener("click", (e) => {
-    if (e.target.tagName === "A" || e.target.tagName === "BUTTON") {
-      actions.classList.remove("open");
-      burger.classList.remove("active");
-    }
-  });
-}
-
 /* ---------- Pencarian game ---------- */
 function initSearch() {
   const input = document.getElementById("searchInput");
@@ -519,7 +500,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       renderVerifyBanner();
     }
   } catch (e) { /* offline — biarkan sesi lokal */ }
-  initNav();
   initSearch();
   // kirim transaksi yang masih di outbox ke database server
   if (typeof GameService.flushOutbox === "function") {
