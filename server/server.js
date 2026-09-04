@@ -54,6 +54,38 @@ const crypto = require("crypto");
 const vm = require("vm");
 const { DatabaseSync } = require("node:sqlite");
 
+/* ---------- Muat file .env (opsional, tanpa dependency) ----------
+   Bila ada file .env di folder server/ atau folder project, isinya dibaca
+   dan dipakai sebagai env var — TIDAK menimpa env yang sudah diset. Format
+   baris: KEY=VALUE ; # komentar didukung; nilai boleh diapit tanda kutip. */
+{
+  const candidates = [path.join(__dirname, ".env"), path.join(__dirname, "..", ".env")];
+  for (const file of candidates) {
+    try {
+      if (!fs.existsSync(file)) continue;
+      const lines = fs.readFileSync(file, "utf8").split(/\r?\n/);
+      for (const raw of lines) {
+        const t = raw.trim();
+        if (!t || t.startsWith("#")) continue;
+        const eq = t.indexOf("=");
+        if (eq <= 0) continue;
+        const k = t.slice(0, eq).trim();
+        let v = t.slice(eq + 1).trim();
+        if (
+          (v.startsWith('"') && v.endsWith('"')) ||
+          (v.startsWith("'") && v.endsWith("'"))
+        ) {
+          v = v.slice(1, -1);
+        }
+        if (k && process.env[k] === undefined) process.env[k] = v;
+      }
+      console.log("[SERVER] Memuat file env: " + file);
+    } catch (e) {
+      console.error("[SERVER] Gagal membaca " + file + ":", e.message);
+    }
+  }
+}
+
 // Password admin server (default admin123, bisa diganti lewat env)
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
 
